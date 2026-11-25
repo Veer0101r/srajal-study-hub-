@@ -1,0 +1,1702 @@
+<!DOCTYPE html>
+<html lang="hi" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Srajal Study Hub | Complete Digital Study OS</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Plus Jakarta Sans, Inter & Noto Sans Devanagari -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans Devanagari', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'Noto Sans Devanagari', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.4); border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.7); }
+        .bento-card {
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .bento-card:hover { transform: translateY(-2px); }
+        .tab-panel { animation: fadeIn 0.25s ease-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen transition-colors duration-300 selection:bg-blue-600 selection:text-white pb-20 md:pb-6">
+
+    <!-- Ambient Background Blobs -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+        <div class="absolute -top-24 -left-24 w-96 h-96 bg-blue-400/20 dark:bg-blue-600/10 rounded-full blur-3xl"></div>
+        <div class="absolute top-1/3 -right-24 w-96 h-96 bg-emerald-400/20 dark:bg-emerald-600/10 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-24 left-1/3 w-96 h-96 bg-indigo-400/20 dark:bg-indigo-600/10 rounded-full blur-3xl"></div>
+    </div>
+
+    <!-- Custom Toast Notification -->
+    <div id="toast" class="fixed bottom-20 md:bottom-6 right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-sm font-semibold">
+        <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400 dark:text-emerald-600 shrink-0"></i>
+        <span id="toast-msg">Saved!</span>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- STUDENT LOGIN & ONBOARDING MODAL (MULTI-STEP)                         -->
+    <!-- ===================================================================== -->
+    <div id="onboarding-modal" class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl my-auto relative">
+            <!-- Top Header -->
+            <div class="flex items-center justify-between gap-3 mb-5">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-emerald-500 flex items-center justify-center text-white shadow-lg">
+                        <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">Created & Powered by Srajal Study Hub</span>
+                        <h2 id="modal-title" class="font-display font-extrabold text-xl text-slate-900 dark:text-white">Student Login & Profile Setup</h2>
+                    </div>
+                </div>
+                <button id="close-modal-btn" onclick="closeOnboardingModal()" class="hidden p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Step Indicator -->
+            <div class="flex items-center gap-2 mb-6">
+                <div id="step-bar-1" class="h-2 flex-1 rounded-full bg-blue-600 transition-all"></div>
+                <div id="step-bar-2" class="h-2 flex-1 rounded-full bg-slate-200 dark:bg-slate-800 transition-all"></div>
+            </div>
+
+            <form id="onboarding-form" onsubmit="saveStudentProfile(event)">
+                <!-- STEP 1: Basic Academic Info -->
+                <div id="onboarding-step-1" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Aapka Poora Naam (Student Name) *</label>
+                        <input type="text" id="prof-name" placeholder="Jaise: Srajal Sharma / Aarav Verma" required
+                            class="w-full px-4 py-3 text-sm font-medium rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Class / Exam *</label>
+                            <select id="prof-class" class="w-full px-4 py-3 text-sm font-semibold rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="Class 6th">Class 6th</option>
+                                <option value="Class 7th">Class 7th</option>
+                                <option value="Class 8th">Class 8th</option>
+                                <option value="Class 9th">Class 9th</option>
+                                <option value="Class 10th" selected>Class 10th</option>
+                                <option value="Class 11th">Class 11th</option>
+                                <option value="Class 12th">Class 12th</option>
+                                <option value="Competitive / GK">Competitive Exams / GK</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Education Board *</label>
+                            <select id="prof-board" class="w-full px-4 py-3 text-sm font-semibold rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="MP Board">MP Board</option>
+                                <option value="CBSE Board" selected>CBSE Board</option>
+                                <option value="ICSE Board">ICSE Board</option>
+                                <option value="UP / Rajasthan / State Board">UP / State Board</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Study Medium Choice -->
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">Study Medium Chunein (माध्यम चुनें) *</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="prof-medium" value="hindi" class="peer sr-only" checked>
+                                <div class="p-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 peer-checked:border-blue-600 peer-checked:bg-blue-50/70 dark:peer-checked:bg-blue-950/40 transition-all text-center">
+                                    <div class="font-display font-bold text-sm text-slate-900 dark:text-white">हिंदी माध्यम</div>
+                                    <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Hindi Medium (हिंदी में प्रश्न)</div>
+                                </div>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="prof-medium" value="english" class="peer sr-only">
+                                <div class="p-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 peer-checked:border-blue-600 peer-checked:bg-blue-50/70 dark:peer-checked:bg-blue-950/40 transition-all text-center">
+                                    <div class="font-display font-bold text-sm text-slate-900 dark:text-white">English Medium</div>
+                                    <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Questions in English</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 flex justify-end">
+                        <button type="button" onclick="goToOnboardingStep(2)" class="w-full sm:w-auto px-6 py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2 transition-all">
+                            <span>Aage Badhein (Step 2)</span>
+                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STEP 2: Subjects, Hobbies & Interests -->
+                <div id="onboarding-step-2" class="hidden space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">Pasandida Subjects (Favorite Subjects)</label>
+                        <div id="fav-subjects-chips" class="flex flex-wrap gap-2">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">Aapki Hobbies & Interests (Kya Achha Lagta Hai?)</label>
+                        <div id="hobbies-chips" class="flex flex-wrap gap-2 mb-2.5">
+                            <!-- Populated by JS -->
+                        </div>
+                        <input type="text" id="prof-custom-hobby" placeholder="Koi aur hobby ya dream goal likhein (e.g., Coding, Cricket, IAS Banna)..."
+                            class="w-full px-4 py-2.5 text-sm rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Daily Study Target (Roz Kitne Ghante Padhna Hai?)</label>
+                        <select id="prof-goal" class="w-full px-4 py-3 text-sm font-semibold rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="2 Hours / 20 Quiz">2 Hours Study + 20 Infinity Quiz</option>
+                            <option value="4 Hours / 40 Quiz" selected>4 Hours Study + 40 Infinity Quiz</option>
+                            <option value="6 Hours / 60 Quiz">6 Hours Study + 60 Infinity Quiz</option>
+                            <option value="8+ Hours Topper Mode">8+ Hours Topper Mode</option>
+                        </select>
+                    </div>
+
+                    <div class="pt-3 flex items-center justify-between gap-3">
+                        <button type="button" onclick="goToOnboardingStep(1)" class="px-5 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-sm flex items-center gap-1.5">
+                            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                            <span>Peeche</span>
+                        </button>
+                        <button type="submit" class="flex-1 py-3 px-6 rounded-2xl bg-gradient-to-r from-blue-600 to-emerald-600 hover:opacity-95 text-white font-bold text-sm shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2 transition-all">
+                            <i data-lucide="sparkles" class="w-4 h-4"></i>
+                            <span>Srajal Study Hub Start Karein</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- TOP STICKY HEADER                                                     -->
+    <!-- ===================================================================== -->
+    <header class="sticky top-0 z-30 backdrop-blur-xl bg-white/80 dark:bg-slate-900/80 border-b border-slate-200/70 dark:border-slate-800/70">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
+            <!-- Brand Logo & Credit -->
+            <div class="flex items-center gap-2.5 cursor-pointer" onclick="switchTab('home')">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-emerald-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/25 shrink-0">
+                    <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="font-display font-extrabold text-base sm:text-xl tracking-tight flex items-center gap-1.5">
+                        Srajal <span class="text-blue-600 dark:text-blue-400">Study Hub</span>
+                    </h1>
+                    <p class="text-[10px] sm:text-[11px] font-semibold text-slate-500 dark:text-slate-400 leading-none">
+                        Created & Powered by Srajal Study Hub
+                    </p>
+                </div>
+            </div>
+
+            <!-- Desktop Navigation Tabs -->
+            <nav class="hidden md:flex items-center gap-1 bg-slate-100/90 dark:bg-slate-800/90 p-1 rounded-2xl border border-slate-200/60 dark:border-slate-700/60">
+                <button onclick="switchTab('home')" data-nav="home" class="nav-btn px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
+                    <i data-lucide="layout-grid" class="w-4 h-4"></i> Home
+                </button>
+                <button onclick="switchTab('quiz')" data-nav="quiz" class="nav-btn px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
+                    <i data-lucide="infinity" class="w-4 h-4"></i> Infinity Quiz
+                </button>
+                <button onclick="switchTab('tasks')" data-nav="tasks" class="nav-btn px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
+                    <i data-lucide="check-square" class="w-4 h-4"></i> Tasks
+                </button>
+                <button onclick="switchTab('notes')" data-nav="notes" class="nav-btn px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
+                    <i data-lucide="notebook-pen" class="w-4 h-4"></i> Notes & Links
+                </button>
+                <button onclick="switchTab('settings')" data-nav="settings" class="nav-btn px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
+                    <i data-lucide="settings" class="w-4 h-4"></i> Settings
+                </button>
+            </nav>
+
+            <!-- Right Controls: Medium Toggle + Theme + Profile Chip -->
+            <div class="flex items-center gap-2">
+                <!-- Medium Switcher Pill -->
+                <button id="header-medium-btn" onclick="toggleMedium()" title="Switch Hindi / English Medium"
+                    class="px-3 py-2 rounded-2xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200/80 dark:border-blue-800/70 text-blue-700 dark:text-blue-300 text-xs font-extrabold flex items-center gap-1.5 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all">
+                    <i data-lucide="languages" class="w-4 h-4"></i>
+                    <span id="header-medium-label">हिंदी माध्यम</span>
+                </button>
+
+                <!-- Theme Toggle -->
+                <button onclick="toggleTheme()" aria-label="Toggle Theme"
+                    class="p-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200/60 dark:border-slate-700/60 transition-colors">
+                    <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
+                    <i data-lucide="sun" class="w-4 h-4 hidden dark:block text-amber-400"></i>
+                </button>
+
+                <!-- Student Profile Avatar Button -->
+                <button onclick="openOnboardingModal(true)" title="Edit Student Profile"
+                    class="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold hover:opacity-90 transition-all">
+                    <span id="header-avatar" class="w-6 h-6 rounded-xl bg-blue-500 text-white flex items-center justify-center text-xs font-extrabold">S</span>
+                    <span id="header-username" class="hidden sm:inline max-w-[90px] truncate">Student</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===================================================================== -->
+    <!-- MAIN CONTENT CONTAINER                                                -->
+    <!-- ===================================================================== -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- ----------------------------------------------------------------- -->
+        <!-- TAB 1: HOME DASHBOARD                                             -->
+        <!-- ----------------------------------------------------------------- -->
+        <div id="tab-home" class="tab-panel space-y-6">
+
+            <!-- Personalized Welcome & Student Profile Banner -->
+            <section class="bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl rounded-3xl p-5 sm:p-7 border border-slate-200/70 dark:border-slate-800/70 shadow-sm relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-72 h-72 bg-gradient-to-bl from-blue-500/10 via-emerald-500/5 to-transparent rounded-bl-full pointer-events-none"></div>
+                
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+                    <div class="space-y-2">
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-600/10 border border-blue-500/20 text-blue-700 dark:text-blue-300 text-xs font-bold">
+                            <i data-lucide="award" class="w-3.5 h-3.5"></i>
+                            <span>Official Platform • Created & Powered by Srajal Study Hub</span>
+                        </div>
+                        <h2 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
+                            Namaste, <span id="home-student-name" class="text-blue-600 dark:text-blue-400">Student</span>! 👋
+                        </h2>
+                        <div class="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                            <span id="home-student-class" class="px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800">Class 10th</span>
+                            <span id="home-student-board" class="px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800">CBSE Board</span>
+                            <span id="home-student-medium" class="px-2.5 py-1 rounded-xl bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">हिंदी माध्यम</span>
+                            <span id="home-student-goal" class="px-2.5 py-1 rounded-xl bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">Target: 4 Hours</span>
+                        </div>
+                        <!-- Hobbies & Interests Display -->
+                        <div id="home-hobbies-row" class="flex flex-wrap items-center gap-1.5 pt-1">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Quick Action Buttons -->
+                    <div class="flex flex-wrap sm:flex-nowrap items-center gap-3 shrink-0">
+                        <button onclick="switchTab('quiz')" class="flex-1 sm:flex-initial px-5 py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:opacity-95 text-white font-bold text-sm shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2 transition-all">
+                            <i data-lucide="infinity" class="w-5 h-5"></i>
+                            <span>Start Infinity Quiz</span>
+                        </button>
+                        <button onclick="openOnboardingModal(true)" class="px-4 py-3.5 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-sm flex items-center justify-center gap-2 transition-all">
+                            <i data-lucide="user-cog" class="w-4 h-4"></i>
+                            <span>Edit Profile</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Live Stats Summary Row (4 Cards) -->
+            <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bento-card bg-white/85 dark:bg-slate-900/85 p-5 rounded-3xl border border-slate-200/70 dark:border-slate-800/70">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Quiz XP Points</span>
+                        <span class="p-2 rounded-xl bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400"><i data-lucide="zap" class="w-4 h-4"></i></span>
+                    </div>
+                    <div id="home-stat-xp" class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">0</div>
+                    <p class="text-[11px] text-slate-500 mt-1"><span id="home-stat-solved">0</span> Questions Solved</p>
+                </div>
+
+                <div class="bento-card bg-white/85 dark:bg-slate-900/85 p-5 rounded-3xl border border-slate-200/70 dark:border-slate-800/70">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Quiz Streak</span>
+                        <span class="p-2 rounded-xl bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400"><i data-lucide="flame" class="w-4 h-4"></i></span>
+                    </div>
+                    <div id="home-stat-streak" class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">0</div>
+                    <p class="text-[11px] text-slate-500 mt-1">Accuracy: <span id="home-stat-acc" class="font-bold text-emerald-600">0%</span></p>
+                </div>
+
+                <div class="bento-card bg-white/85 dark:bg-slate-900/85 p-5 rounded-3xl border border-slate-200/70 dark:border-slate-800/70">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Tasks Done</span>
+                        <span class="p-2 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400"><i data-lucide="check-circle" class="w-4 h-4"></i></span>
+                    </div>
+                    <div id="home-stat-tasks" class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">0/0</div>
+                    <p class="text-[11px] text-slate-500 mt-1">Daily Study Targets</p>
+                </div>
+
+                <div class="bento-card bg-white/85 dark:bg-slate-900/85 p-5 rounded-3xl border border-slate-200/70 dark:border-slate-800/70">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Focus Sessions</span>
+                        <span class="p-2 rounded-xl bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400"><i data-lucide="timer" class="w-4 h-4"></i></span>
+                    </div>
+                    <div id="home-stat-sessions" class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">0</div>
+                    <p class="text-[11px] text-slate-500 mt-1">Pomodoro Completed</p>
+                </div>
+            </section>
+
+            <!-- Quick Launch Subjects Grid + Pomodoro Timer -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Left 7 Cols: Subject-wise Quick Quiz Cards -->
+                <div class="lg:col-span-7 bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl rounded-3xl p-6 border border-slate-200/70 dark:border-slate-800/70 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="font-display font-bold text-lg text-slate-900 dark:text-white">Subject-Wise Infinity Quiz (∞)</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Kisi bhi subject par click karein aur turant practice shuru karein</p>
+                        </div>
+                        <span class="text-xs font-bold px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300">7 Subjects</span>
+                    </div>
+                    <div id="home-subjects-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Right 5 Cols: Pomodoro Focus Timer -->
+                <div class="lg:col-span-5 bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl rounded-3xl p-6 border border-slate-200/70 dark:border-slate-800/70 shadow-sm flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2.5">
+                            <span class="p-2.5 rounded-2xl bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400">
+                                <i data-lucide="timer" class="w-5 h-5"></i>
+                            </span>
+                            <div>
+                                <h3 class="font-display font-bold text-base">Pomodoro Focus Timer</h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Deep Study Mode</p>
+                            </div>
+                        </div>
+                        <span id="session-badge" class="text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">Sessions: 0</span>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl text-xs font-bold">
+                        <button onclick="setTimerMode('focus')" id="mode-focus" class="py-2 rounded-xl bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm">Padhai (25m)</button>
+                        <button onclick="setTimerMode('short')" id="mode-short" class="py-2 rounded-xl text-slate-600 dark:text-slate-400">Break (5m)</button>
+                        <button onclick="setTimerMode('long')" id="mode-long" class="py-2 rounded-xl text-slate-600 dark:text-slate-400">Rest (15m)</button>
+                    </div>
+
+                    <div class="text-center my-6">
+                        <div id="timer-display" class="font-display text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white tabular-nums">25:00</div>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">25 min full focus ke baad 5 min break lein</p>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <button onclick="toggleTimer()" class="flex-1 py-3.5 px-5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2 transition-all">
+                            <i data-lucide="play" id="timer-btn-icon" class="w-4 h-4"></i>
+                            <span id="timer-btn-text">Start Padhai</span>
+                        </button>
+                        <button onclick="resetTimer()" class="p-3.5 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300">
+                            <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ----------------------------------------------------------------- -->
+        <!-- TAB 2: INFINITY QUIZ ENGINE (∞ QUESTIONS)                         -->
+        <!-- ----------------------------------------------------------------- -->
+        <div id="tab-quiz" class="tab-panel hidden space-y-6">
+            <section class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-3xl p-5 sm:p-7 border-2 border-blue-500/30 shadow-md">
+                <!-- Quiz Header -->
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-200/70 dark:border-slate-800/70">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shrink-0">
+                            <i data-lucide="infinity" class="w-7 h-7"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h2 class="font-display font-extrabold text-xl text-slate-900 dark:text-white">Infinity Quiz Engine (∞)</h2>
+                                <span id="quiz-active-medium-badge" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">हिंदी माध्यम</span>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                Hindi subject hamesha हिंदी mein aur English subject hamesha English mein rahega. Baaki subjects aapke chune hue Medium mein aayenge!
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Live Quiz Score Pills -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <div class="px-3 py-1.5 rounded-2xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200/70 dark:border-amber-800/50 text-xs font-bold text-amber-700 dark:text-amber-300 flex items-center gap-1.5">
+                            <i data-lucide="flame" class="w-4 h-4 text-amber-500"></i> Streak: <span id="quiz-streak">0</span>
+                        </div>
+                        <div class="px-3 py-1.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/70 dark:border-emerald-800/50 text-xs font-bold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
+                            <i data-lucide="target" class="w-4 h-4 text-emerald-500"></i> Accuracy: <span id="quiz-accuracy">0%</span>
+                        </div>
+                        <div class="px-3 py-1.5 rounded-2xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200/70 dark:border-blue-800/50 text-xs font-bold text-blue-700 dark:text-blue-300 flex items-center gap-1.5">
+                            <i data-lucide="zap" class="w-4 h-4 text-blue-500"></i> XP: <span id="quiz-xp">0</span> (<span id="quiz-solved">0</span>)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quiz Controls -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 my-5">
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Subject Chunein</label>
+                        <select id="quiz-subject-select" onchange="generateNextQuestion()" class="w-full px-3.5 py-2.5 text-sm font-bold rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="All">All Subjects Mix (∞)</option>
+                            <option value="Maths">Maths (गणित)</option>
+                            <option value="Science">Science (विज्ञान)</option>
+                            <option value="Social Science">Social Science (सामाजिक विज्ञान)</option>
+                            <option value="GK">GK & Current Affairs (सामान्य ज्ञान)</option>
+                            <option value="Hindi">Hindi (हिंदी व्याकरण एवं साहित्य)</option>
+                            <option value="English">English (Grammar & Vocabulary)</option>
+                            <option value="IT/ITeS">IT / ITeS (कंप्यूटर एवं सूचना प्रौद्योगिकी)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Difficulty Level</label>
+                        <select id="quiz-difficulty-select" onchange="generateNextQuestion()" class="w-full px-3.5 py-2.5 text-sm font-bold rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="Easy">Easy (सरल)</option>
+                            <option value="Medium" selected>Medium (मध्यम)</option>
+                            <option value="Hard">Hard (कठिन)</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-end gap-2">
+                        <button onclick="generateNextQuestion()" class="flex-1 py-2.5 px-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:opacity-95 text-white font-bold text-sm shadow-md flex items-center justify-center gap-2 transition-all">
+                            <i data-lucide="shuffle" class="w-4 h-4"></i>
+                            <span>Next ∞ Question</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Question Box -->
+                <div class="bg-slate-50 dark:bg-slate-800/70 rounded-3xl p-5 sm:p-6 border border-slate-200/80 dark:border-slate-700/70">
+                    <div class="flex items-center justify-between gap-2 mb-3">
+                        <div class="flex items-center gap-2">
+                            <span id="q-badge-subject" class="text-xs font-extrabold px-3 py-1 rounded-xl bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300">Maths</span>
+                            <span id="q-badge-difficulty" class="text-xs font-bold px-3 py-1 rounded-xl bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300">Medium</span>
+                        </div>
+                        <span class="text-[11px] text-slate-400 hidden sm:inline">Keys: <kbd class="px-1.5 py-0.5 bg-white dark:bg-slate-700 rounded border">1-4</kbd> & <kbd class="px-1.5 py-0.5 bg-white dark:bg-slate-700 rounded border">Enter</kbd></span>
+                    </div>
+
+                    <h3 id="quiz-question-text" class="font-display font-bold text-lg sm:text-xl text-slate-900 dark:text-white leading-relaxed mb-5">
+                        Loading Question...
+                    </h3>
+
+                    <div id="quiz-options-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <!-- Options injected via JS -->
+                    </div>
+
+                    <!-- Explanation Banner -->
+                    <div id="quiz-explanation-box" class="hidden mt-5 p-4 rounded-2xl border transition-all">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div class="flex items-start gap-3">
+                                <div id="quiz-feedback-icon" class="mt-0.5 shrink-0"></div>
+                                <div>
+                                    <h4 id="quiz-feedback-title" class="font-bold text-sm"></h4>
+                                    <p id="quiz-feedback-desc" class="text-xs sm:text-sm mt-1 leading-relaxed opacity-90"></p>
+                                </div>
+                            </div>
+                            <button onclick="generateNextQuestion()" class="px-4 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-extrabold hover:opacity-90 shrink-0 flex items-center justify-center gap-1.5">
+                                <span>Agla Sawal (Next)</span>
+                                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ----------------------------------------------------------------- -->
+        <!-- TAB 3: DAILY STUDY CHECKLIST (TASKS)                              -->
+        <!-- ----------------------------------------------------------------- -->
+        <div id="tab-tasks" class="tab-panel hidden">
+            <section class="bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl rounded-3xl p-6 border border-slate-200/70 dark:border-slate-800/70 shadow-sm max-w-3xl mx-auto">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <span class="p-2.5 rounded-2xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400">
+                            <i data-lucide="check-square" class="w-6 h-6"></i>
+                        </span>
+                        <div>
+                            <h2 class="font-display font-extrabold text-xl">Aaj ke Study Targets</h2>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Apne daily chapters, homework aur revision goals track karein</p>
+                        </div>
+                    </div>
+                    <span id="task-counter" class="text-xs font-extrabold px-3 py-1.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">0/0 Done</span>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="mb-6">
+                    <div class="flex justify-between text-xs font-bold mb-1.5">
+                        <span class="text-slate-500">Daily Completion Progress</span>
+                        <span id="progress-percent" class="text-emerald-600 dark:text-emerald-400">0%</span>
+                    </div>
+                    <div class="w-full h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                        <div id="progress-bar" class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Add Task Form -->
+                <form id="task-form" class="flex flex-col sm:flex-row gap-2.5 mb-6">
+                    <select id="task-subject" class="px-3.5 py-3 text-sm font-bold rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                        <option value="Maths">Maths</option>
+                        <option value="Science">Science</option>
+                        <option value="Social Science">Social Science</option>
+                        <option value="GK">GK</option>
+                        <option value="Hindi">Hindi</option>
+                        <option value="English">English</option>
+                        <option value="IT/ITeS">IT/ITeS</option>
+                    </select>
+                    <input type="text" id="task-input" placeholder="Naya study target likhein (e.g., Science Chapter 1 Notes)..." required
+                        class="flex-1 px-4 py-3 text-sm rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button type="submit" class="px-5 py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm flex items-center justify-center gap-1.5">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Add Target
+                    </button>
+                </form>
+
+                <div id="task-list" class="space-y-2.5">
+                    <!-- Populated via JS -->
+                </div>
+            </section>
+        </div>
+
+        <!-- ----------------------------------------------------------------- -->
+        <!-- TAB 4: AUTO-SAVE NOTES & RESOURCE LINKS                           -->
+        <!-- ----------------------------------------------------------------- -->
+        <div id="tab-notes" class="tab-panel hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Left 6 Cols: Subject Notes Scratchpad -->
+            <section class="lg:col-span-6 bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl rounded-3xl p-6 border border-slate-200/70 dark:border-slate-800/70 shadow-sm flex flex-col">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2.5">
+                        <span class="p-2.5 rounded-2xl bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400">
+                            <i data-lucide="notebook-pen" class="w-5 h-5"></i>
+                        </span>
+                        <div>
+                            <h2 class="font-display font-extrabold text-lg">Formula & Quick Notes</h2>
+                            <p class="text-xs text-slate-500">Har subject ke notes automatic save hote hain</p>
+                        </div>
+                    </div>
+                    <select id="notes-subject-select" onchange="loadNotesForSubject()" class="px-3 py-2 text-xs font-bold rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                        <option value="Maths">Maths</option>
+                        <option value="Science">Science</option>
+                        <option value="Social Science">Social Science</option>
+                        <option value="GK">GK</option>
+                        <option value="Hindi">Hindi</option>
+                        <option value="English">English</option>
+                        <option value="IT/ITeS">IT/ITeS</option>
+                    </select>
+                </div>
+
+                <textarea id="quick-notes" placeholder="Yahan apne important formulas, definitions, ya revision points likhein..."
+                    class="flex-1 w-full min-h-[280px] p-4 rounded-2xl bg-slate-100/90 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-amber-500/50 resize-none"></textarea>
+
+                <div class="flex items-center justify-between mt-3 text-xs text-slate-500">
+                    <span id="notes-save-status" class="font-semibold text-emerald-600">Auto-Saved ✓</span>
+                    <button onclick="copyNotes()" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1">
+                        <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy Notes
+                    </button>
+                </div>
+            </section>
+
+            <!-- Right 6 Cols: Important Study Links & PDFs -->
+            <section class="lg:col-span-6 bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl rounded-3xl p-6 border border-slate-200/70 dark:border-slate-800/70 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2.5">
+                        <span class="p-2.5 rounded-2xl bg-purple-100 dark:bg-purple-950 text-purple-600 dark:text-purple-400">
+                            <i data-lucide="folder-heart" class="w-5 h-5"></i>
+                        </span>
+                        <div>
+                            <h2 class="font-display font-extrabold text-lg">Study Links & PDFs</h2>
+                            <p class="text-xs text-slate-500">Important videos aur notes ek jagah</p>
+                        </div>
+                    </div>
+                </div>
+
+                <form id="resource-form" class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4">
+                    <input type="text" id="res-title" placeholder="Title (e.g., NCERT Maths)" required
+                        class="px-3.5 py-2.5 text-xs font-medium rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                    <input type="url" id="res-url" placeholder="https://..." required
+                        class="px-3.5 py-2.5 text-xs font-medium rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                    <button type="submit" class="py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold">
+                        + Save Link
+                    </button>
+                </form>
+
+                <div id="resource-list" class="space-y-2.5 max-h-[300px] overflow-y-auto pr-1">
+                    <!-- Populated via JS -->
+                </div>
+            </section>
+        </div>
+
+        <!-- ----------------------------------------------------------------- -->
+        <!-- TAB 5: IMPORTANT SETTINGS & PROFILE PANEL                         -->
+        <!-- ----------------------------------------------------------------- -->
+        <div id="tab-settings" class="tab-panel hidden max-w-4xl mx-auto space-y-6">
+            <section class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-slate-200/70 dark:border-slate-800/70 shadow-sm space-y-6">
+                <div class="flex items-center gap-3 pb-4 border-b border-slate-200/70 dark:border-slate-800/70">
+                    <div class="w-11 h-11 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center">
+                        <i data-lucide="settings" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-display font-extrabold text-xl">Important Settings & Student Profile</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Apni profile, study medium, sound aur app preferences yahan se control karein</p>
+                    </div>
+                </div>
+
+                <!-- Student Profile Card inside Settings -->
+                <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/70 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="space-y-1">
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">Logged In Student</span>
+                        <h3 id="settings-prof-name" class="font-display font-extrabold text-lg">Student Name</h3>
+                        <p id="settings-prof-details" class="text-xs text-slate-600 dark:text-slate-300">Class 10th • CBSE Board • Target: 4 Hours</p>
+                        <p id="settings-prof-hobbies" class="text-xs text-slate-500 dark:text-slate-400">Hobbies: Reading, Coding</p>
+                    </div>
+                    <button onclick="openOnboardingModal(true)" class="px-5 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center justify-center gap-2 shrink-0">
+                        <i data-lucide="edit-3" class="w-4 h-4"></i> Edit Complete Info
+                    </button>
+                </div>
+
+                <!-- Settings Toggles Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Setting 1: Study Medium -->
+                    <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
+                        <div>
+                            <h4 class="font-bold text-sm">Study Medium (माध्यम)</h4>
+                            <p class="text-xs text-slate-500">Quiz aur explanations ki bhasha badlein</p>
+                        </div>
+                        <button onclick="toggleMedium()" id="settings-medium-btn" class="px-3.5 py-2 rounded-xl bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300 text-xs font-extrabold">
+                            हिंदी माध्यम
+                        </button>
+                    </div>
+
+                    <!-- Setting 2: Dark / Light Theme -->
+                    <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
+                        <div>
+                            <h4 class="font-bold text-sm">Appearance Theme</h4>
+                            <p class="text-xs text-slate-500">Light mode ya Eye-comfort Dark mode</p>
+                        </div>
+                        <button onclick="toggleTheme()" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold">
+                            Switch Theme
+                        </button>
+                    </div>
+
+                    <!-- Setting 3: Quiz Sound Effects -->
+                    <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
+                        <div>
+                            <h4 class="font-bold text-sm">Quiz Sound Effects</h4>
+                            <p class="text-xs text-slate-500">Sahi/Galat jawab par audio feedback</p>
+                        </div>
+                        <button onclick="toggleQuizSound()" id="settings-sound-btn" class="px-3.5 py-2 rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 text-xs font-extrabold">
+                            ON
+                        </button>
+                    </div>
+
+                    <!-- Setting 4: Auto-Next Question -->
+                    <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
+                        <div>
+                            <h4 class="font-bold text-sm">Auto-Next Question (2.5s)</h4>
+                            <p class="text-xs text-slate-500">Sahi jawab ke baad apne aap agla sawal</p>
+                        </div>
+                        <button onclick="toggleAutoNext()" id="settings-autonext-btn" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-extrabold">
+                            OFF
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Danger Zone / Reset -->
+                <div class="pt-4 border-t border-slate-200/70 dark:border-slate-800/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <h4 class="font-bold text-sm text-rose-600">Reset Quiz Stats / Logout Profile</h4>
+                        <p class="text-xs text-slate-500">Apna XP score reset karein ya naye student ke roop mein login karein</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="resetQuizStats()" class="px-4 py-2 rounded-xl bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 text-xs font-bold hover:bg-rose-100">
+                            Reset Quiz XP
+                        </button>
+                        <button onclick="logoutProfile()" class="px-4 py-2 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold hover:opacity-90">
+                            New Student Login
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+    </main>
+
+    <!-- ===================================================================== -->
+    <!-- FOOTER WITH FULL SRAJAL STUDY HUB CREDIT                              -->
+    <!-- ===================================================================== -->
+    <footer class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center">
+        <div class="inline-flex flex-col sm:flex-row items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-white/80 dark:bg-slate-900/80 border border-slate-200/70 dark:border-slate-800/70 shadow-sm">
+            <span class="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-slate-200">
+                © 2026 Srajal Study Hub • Created & Powered by Srajal Study Hub
+            </span>
+            <span class="hidden sm:inline text-slate-400">•</span>
+            <span class="text-xs text-slate-500 dark:text-slate-400">
+                Hindi & English Medium Infinity Study OS
+            </span>
+        </div>
+    </footer>
+
+    <!-- ===================================================================== -->
+    <!-- MOBILE BOTTOM NAVIGATION BAR                                          -->
+    <!-- ===================================================================== -->
+    <nav class="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 flex items-center justify-around py-2 px-1">
+        <button onclick="switchTab('home')" data-nav="home" class="nav-btn flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-[10px] font-bold">
+            <i data-lucide="layout-grid" class="w-5 h-5"></i> Home
+        </button>
+        <button onclick="switchTab('quiz')" data-nav="quiz" class="nav-btn flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-[10px] font-bold">
+            <i data-lucide="infinity" class="w-5 h-5"></i> Quiz ∞
+        </button>
+        <button onclick="switchTab('tasks')" data-nav="tasks" class="nav-btn flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-[10px] font-bold">
+            <i data-lucide="check-square" class="w-5 h-5"></i> Tasks
+        </button>
+        <button onclick="switchTab('notes')" data-nav="notes" class="nav-btn flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-[10px] font-bold">
+            <i data-lucide="notebook-pen" class="w-5 h-5"></i> Notes
+        </button>
+        <button onclick="switchTab('settings')" data-nav="settings" class="nav-btn flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-[10px] font-bold">
+            <i data-lucide="settings" class="w-5 h-5"></i> Settings
+        </button>
+    </nav>
+
+    <!-- ===================================================================== -->
+    <!-- COMPLETE JAVASCRIPT ENGINE                                            -->
+    <!-- ===================================================================== -->
+    <script>
+        // --- 1. CONSTANTS & STATE ---
+        const ALL_SUBJECTS = [
+            { id: 'Maths', hi: 'गणित (Maths)', en: 'Maths', icon: 'calculator', color: 'blue' },
+            { id: 'Science', hi: 'विज्ञान (Science)', en: 'Science', icon: 'flask-conical', color: 'emerald' },
+            { id: 'Social Science', hi: 'सामाजिक विज्ञान', en: 'Social Science', icon: 'globe', color: 'amber' },
+            { id: 'GK', hi: 'सामान्य ज्ञान (GK)', en: 'GK & Current Affairs', icon: 'compass', color: 'cyan' },
+            { id: 'Hindi', hi: 'हिंदी (Hindi)', en: 'Hindi (हिंदी)', icon: 'book-open', color: 'rose' },
+            { id: 'English', hi: 'English', en: 'English', icon: 'languages', color: 'sky' },
+            { id: 'IT/ITeS', hi: 'IT / ITeS (कंप्यूटर)', en: 'IT / ITeS', icon: 'cpu', color: 'purple' }
+        ];
+
+        const HOBBY_OPTIONS = [
+            '📚 Reading Books', '💻 Coding & Tech', '🏏 Cricket / Sports', '🎨 Drawing & Art',
+            '🎵 Music', '♟️ Chess & Puzzles', '🔬 Science Experiments', '🌍 General Knowledge'
+        ];
+
+        let state = {
+            activeTab: 'home',
+            theme: localStorage.getItem('ssh_theme') || 'light',
+            profile: JSON.parse(localStorage.getItem('ssh_profile')) || null,
+            sessionsCompleted: parseInt(localStorage.getItem('ssh_sessions') || '0'),
+            tasks: JSON.parse(localStorage.getItem('ssh_tasks')) || [
+                { id: 1, subject: 'Maths', text: 'द्विघात समीकरण (Quadratic Equations) के 10 प्रश्न हल करना', completed: false },
+                { id: 2, subject: 'Science', text: 'रासायनिक अभिक्रियाएँ (Chemical Reactions) नोट्स रिवीजन', completed: true },
+                { id: 3, subject: 'GK', text: 'भारत के राज्य और राजधानियाँ Infinity Quiz खेलना', completed: false }
+            ],
+            notes: JSON.parse(localStorage.getItem('ssh_notes')) || {
+                'Maths': '(a + b)² = a² + 2ab + b²\nsin²θ + cos²θ = 1',
+                'Science': 'ओम का नियम (Ohm’s Law): V = I × R\nशुद्ध जल का pH मान = 7',
+                'Social Science': '1857 की क्रांति, असहयोग आंदोलन (1920), दांडी मार्च (1930)',
+                'GK': 'ISRO मुख्यालय: बेंगलुरु | RBI मुख्यालय: मुंबई | संविधान दिवस: 26 नवंबर',
+                'Hindi': 'संधि, समास, रस, छंद और अलंकार के मुख्य भेद...',
+                'English': 'Tenses, Active-Passive Voice & Formal Letter Writing rules...',
+                'IT/ITeS': 'SQL Commands: SELECT, INSERT, UPDATE, DELETE | Shortcut: Ctrl+C, Ctrl+V'
+            },
+            resources: JSON.parse(localStorage.getItem('ssh_resources')) || [
+                { id: 1, title: 'NCERT Official Textbooks (Hindi & English)', url: 'https://ncert.nic.in/textbook.php' },
+                { id: 2, title: 'CBSE & MP Board Sample Papers', url: 'https://cbseacademic.nic.in/' },
+                { id: 3, title: 'Srajal Study Hub Google Search Helper', url: 'https://www.google.com/' }
+            ],
+            quiz: JSON.parse(localStorage.getItem('ssh_quiz')) || {
+                streak: 0,
+                solved: 0,
+                correct: 0,
+                xp: 0,
+                sound: true,
+                autoNext: false
+            }
+        };
+
+        let selectedFavSubjects = ['Maths', 'Science', 'GK'];
+        let selectedHobbies = ['📚 Reading Books', '💻 Coding & Tech'];
+
+        // --- 2. INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            applyTheme(state.theme);
+            renderOnboardingChips();
+
+            if (!state.profile) {
+                openOnboardingModal(false);
+            } else {
+                syncProfileUI();
+            }
+
+            renderHomeSubjects();
+            renderTasks();
+            loadNotesForSubject();
+            renderResources();
+            updateSessionBadge();
+            updateQuizStatsUI();
+            updateSettingsUI();
+            switchTab('home');
+            generateNextQuestion();
+            lucide.createIcons();
+        });
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').textContent = msg;
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-y-24', 'opacity-0'), 2600);
+        }
+
+        // --- 3. ONBOARDING & STUDENT LOGIN SYSTEM ---
+        function renderOnboardingChips() {
+            const subContainer = document.getElementById('fav-subjects-chips');
+            subContainer.innerHTML = ALL_SUBJECTS.map(s => {
+                const active = selectedFavSubjects.includes(s.id);
+                return `<button type="button" onclick="toggleChip('subject', '${s.id}')"
+                    class="px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${active ? 'bg-blue-600 text-white border-blue-600' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-transparent'}">
+                    ${s.en}
+                </button>`;
+            }).join('');
+
+            const hobContainer = document.getElementById('hobbies-chips');
+            hobContainer.innerHTML = HOBBY_OPTIONS.map(h => {
+                const active = selectedHobbies.includes(h);
+                return `<button type="button" onclick="toggleChip('hobby', '${h}')"
+                    class="px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${active ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-transparent'}">
+                    ${h}
+                </button>`;
+            }).join('');
+        }
+
+        function toggleChip(type, val) {
+            if (type === 'subject') {
+                selectedFavSubjects = selectedFavSubjects.includes(val)
+                    ? selectedFavSubjects.filter(x => x !== val)
+                    : [...selectedFavSubjects, val];
+            } else {
+                selectedHobbies = selectedHobbies.includes(val)
+                    ? selectedHobbies.filter(x => x !== val)
+                    : [...selectedHobbies, val];
+            }
+            renderOnboardingChips();
+        }
+
+        function openOnboardingModal(allowClose = true) {
+            const modal = document.getElementById('onboarding-modal');
+            const closeBtn = document.getElementById('close-modal-btn');
+            closeBtn.classList.toggle('hidden', !allowClose);
+
+            if (state.profile) {
+                document.getElementById('prof-name').value = state.profile.name || '';
+                document.getElementById('prof-class').value = state.profile.studentClass || 'Class 10th';
+                document.getElementById('prof-board').value = state.profile.board || 'CBSE Board';
+                document.getElementById('prof-goal').value = state.profile.goal || '4 Hours / 40 Quiz';
+                document.getElementById('prof-custom-hobby').value = state.profile.customHobby || '';
+                const medRadio = document.querySelector(`input[name="prof-medium"][value="${state.profile.medium || 'hindi'}"]`);
+                if (medRadio) medRadio.checked = true;
+                selectedFavSubjects = state.profile.favSubjects || ['Maths', 'Science'];
+                selectedHobbies = state.profile.hobbies || ['📚 Reading Books'];
+                renderOnboardingChips();
+            }
+
+            goToOnboardingStep(1);
+            modal.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeOnboardingModal() {
+            document.getElementById('onboarding-modal').classList.add('hidden');
+        }
+
+        function goToOnboardingStep(step) {
+            const nameVal = document.getElementById('prof-name').value.trim();
+            if (step === 2 && !nameVal) {
+                showToast('Kripya pehle apna Naam likhein!');
+                document.getElementById('prof-name').focus();
+                return;
+            }
+            document.getElementById('onboarding-step-1').classList.toggle('hidden', step !== 1);
+            document.getElementById('onboarding-step-2').classList.toggle('hidden', step !== 2);
+            document.getElementById('step-bar-2').className = step === 2
+                ? 'h-2 flex-1 rounded-full bg-blue-600 transition-all'
+                : 'h-2 flex-1 rounded-full bg-slate-200 dark:bg-slate-800 transition-all';
+        }
+
+        function saveStudentProfile(e) {
+            e.preventDefault();
+            const name = document.getElementById('prof-name').value.trim();
+            const studentClass = document.getElementById('prof-class').value;
+            const board = document.getElementById('prof-board').value;
+            const medium = document.querySelector('input[name="prof-medium"]:checked').value;
+            const goal = document.getElementById('prof-goal').value;
+            const customHobby = document.getElementById('prof-custom-hobby').value.trim();
+
+            state.profile = {
+                name,
+                studentClass,
+                board,
+                medium,
+                goal,
+                favSubjects: selectedFavSubjects,
+                hobbies: selectedHobbies,
+                customHobby
+            };
+
+            localStorage.setItem('ssh_profile', JSON.stringify(state.profile));
+            closeOnboardingModal();
+            syncProfileUI();
+            renderHomeSubjects();
+            generateNextQuestion();
+            showToast(`Swagat hai ${name}! Profile save ho gayi 🎉`);
+        }
+
+        function logoutProfile() {
+            localStorage.removeItem('ssh_profile');
+            state.profile = null;
+            openOnboardingModal(false);
+        }
+
+        function getActiveMedium() {
+            return (state.profile && state.profile.medium) ? state.profile.medium : 'hindi';
+        }
+
+        function toggleMedium() {
+            if (!state.profile) {
+                state.profile = { name: 'Student', studentClass: 'Class 10th', board: 'CBSE Board', medium: 'hindi', goal: '4 Hours / 40 Quiz', favSubjects: ['Maths', 'Science'], hobbies: ['📚 Reading Books'], customHobby: '' };
+            }
+            state.profile.medium = state.profile.medium === 'hindi' ? 'english' : 'hindi';
+            localStorage.setItem('ssh_profile', JSON.stringify(state.profile));
+            syncProfileUI();
+            renderHomeSubjects();
+            generateNextQuestion();
+            showToast(state.profile.medium === 'hindi' ? 'माध्यम बदला गया: हिंदी माध्यम' : 'Medium Switched: English Medium');
+        }
+
+        function syncProfileUI() {
+            const p = state.profile || { name: 'Student', studentClass: 'Class 10th', board: 'CBSE Board', medium: 'hindi', goal: '4 Hours / 40 Quiz', favSubjects: [], hobbies: [], customHobby: '' };
+            const medLabel = p.medium === 'hindi' ? 'हिंदी माध्यम' : 'English Medium';
+
+            document.getElementById('header-avatar').textContent = p.name.charAt(0).toUpperCase();
+            document.getElementById('header-username').textContent = p.name.split(' ')[0];
+            document.getElementById('header-medium-label').textContent = medLabel;
+
+            document.getElementById('home-student-name').textContent = p.name;
+            document.getElementById('home-student-class').textContent = p.studentClass;
+            document.getElementById('home-student-board').textContent = p.board;
+            document.getElementById('home-student-medium').textContent = medLabel;
+            document.getElementById('home-student-goal').textContent = `Goal: ${p.goal}`;
+
+            document.getElementById('quiz-active-medium-badge').textContent = medLabel;
+            document.getElementById('settings-medium-btn').textContent = medLabel;
+            document.getElementById('settings-prof-name').textContent = p.name;
+            document.getElementById('settings-prof-details').textContent = `${p.studentClass} • ${p.board} • ${medLabel} • ${p.goal}`;
+
+            const allHobbies = [...(p.hobbies || [])];
+            if (p.customHobby) allHobbies.push(`✨ ${p.customHobby}`);
+            document.getElementById('settings-prof-hobbies').textContent = `Hobbies: ${allHobbies.join(', ') || 'Studying'}`;
+
+            const hobbiesRow = document.getElementById('home-hobbies-row');
+            hobbiesRow.innerHTML = allHobbies.map(h =>
+                `<span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/50 dark:border-indigo-800/50">${escapeHTML(h)}</span>`
+            ).join('');
+        }
+
+        // --- 4. NAVIGATION & THEME ---
+        function switchTab(tabId) {
+            state.activeTab = tabId;
+            ['home', 'quiz', 'tasks', 'notes', 'settings'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.toggle('hidden', t !== tabId);
+            });
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                const isTarget = btn.getAttribute('data-nav') === tabId;
+                if (isTarget) {
+                    btn.classList.add('bg-blue-600', 'text-white', 'shadow-sm');
+                    btn.classList.remove('text-slate-600', 'dark:text-slate-400');
+                } else {
+                    btn.classList.remove('bg-blue-600', 'text-white', 'shadow-sm');
+                    btn.classList.add('text-slate-600', 'dark:text-slate-400');
+                }
+            });
+            updateHomeStats();
+        }
+
+        function applyTheme(theme) {
+            document.documentElement.classList.toggle('dark', theme === 'dark');
+            localStorage.setItem('ssh_theme', theme);
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === 'light' ? 'dark' : 'light';
+            applyTheme(state.theme);
+        }
+
+        function renderHomeSubjects() {
+            const med = getActiveMedium();
+            const grid = document.getElementById('home-subjects-grid');
+            grid.innerHTML = ALL_SUBJECTS.map(sub => {
+                const label = sub.id === 'Hindi' ? 'हिंदी (Hindi)' : (sub.id === 'English' ? 'English' : (med === 'hindi' ? sub.hi : sub.en));
+                const langTag = sub.id === 'Hindi' ? 'हिंदी में प्रश्न' : (sub.id === 'English' ? 'In English' : (med === 'hindi' ? 'हिंदी माध्यम' : 'English Med'));
+                return `
+                    <button onclick="startSubjectQuiz('${sub.id}')"
+                        class="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 hover:bg-blue-50 dark:hover:bg-blue-950/40 border border-slate-200/70 dark:border-slate-700/70 hover:border-blue-400 transition-all text-left group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                                <i data-lucide="${sub.icon}" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <div class="font-display font-bold text-sm text-slate-900 dark:text-white">${label}</div>
+                                <div class="text-[11px] text-slate-500 dark:text-slate-400">${langTag} • ∞ Questions</div>
+                            </div>
+                        </div>
+                        <i data-lucide="arrow-right-circle" class="w-5 h-5 text-slate-400 group-hover:text-blue-600 transition-colors"></i>
+                    </button>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function startSubjectQuiz(subId) {
+            document.getElementById('quiz-subject-select').value = subId;
+            switchTab('quiz');
+            generateNextQuestion();
+        }
+
+        function updateHomeStats() {
+            document.getElementById('home-stat-xp').textContent = state.quiz.xp;
+            document.getElementById('home-stat-solved').textContent = state.quiz.solved;
+            document.getElementById('home-stat-streak').textContent = state.quiz.streak;
+            const acc = state.quiz.solved === 0 ? 0 : Math.round((state.quiz.correct / state.quiz.solved) * 100);
+            document.getElementById('home-stat-acc').textContent = `${acc}%`;
+
+            const done = state.tasks.filter(t => t.completed).length;
+            document.getElementById('home-stat-tasks').textContent = `${done}/${state.tasks.length}`;
+            document.getElementById('home-stat-sessions').textContent = state.sessionsCompleted;
+        }
+
+        // --- 5. POMODORO FOCUS TIMER ---
+        let timerInterval = null;
+        let timerSeconds = 25 * 60;
+        let isRunning = false;
+        let currentMode = 'focus';
+        const MODES = { focus: 25, short: 5, long: 15 };
+
+        function updateTimerUI() {
+            const mins = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
+            const secs = String(timerSeconds % 60).padStart(2, '0');
+            document.getElementById('timer-display').textContent = `${mins}:${secs}`;
+        }
+
+        function setTimerMode(mode) {
+            clearInterval(timerInterval);
+            isRunning = false;
+            currentMode = mode;
+            timerSeconds = MODES[mode] * 60;
+            ['focus', 'short', 'long'].forEach(m => {
+                const btn = document.getElementById(`mode-${m}`);
+                btn.className = m === mode
+                    ? 'py-2 rounded-xl bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                    : 'py-2 rounded-xl text-slate-600 dark:text-slate-400';
+            });
+            document.getElementById('timer-btn-text').textContent = 'Start Padhai';
+            document.getElementById('timer-btn-icon').setAttribute('data-lucide', 'play');
+            lucide.createIcons();
+            updateTimerUI();
+        }
+
+        function toggleTimer() {
+            if (isRunning) {
+                clearInterval(timerInterval);
+                isRunning = false;
+                document.getElementById('timer-btn-text').textContent = 'Resume';
+                document.getElementById('timer-btn-icon').setAttribute('data-lucide', 'play');
+            } else {
+                isRunning = true;
+                document.getElementById('timer-btn-text').textContent = 'Pause';
+                document.getElementById('timer-btn-icon').setAttribute('data-lucide', 'pause');
+                timerInterval = setInterval(() => {
+                    if (timerSeconds > 0) {
+                        timerSeconds--;
+                        updateTimerUI();
+                    } else {
+                        clearInterval(timerInterval);
+                        isRunning = false;
+                        playQuizTone(true);
+                        if (currentMode === 'focus') {
+                            state.sessionsCompleted++;
+                            localStorage.setItem('ssh_sessions', state.sessionsCompleted);
+                            updateSessionBadge();
+                            updateHomeStats();
+                            showToast('Shabaash! 1 Focus Session complete hua 🎉');
+                        }
+                        resetTimer();
+                    }
+                }, 1000);
+            }
+            lucide.createIcons();
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            timerSeconds = MODES[currentMode] * 60;
+            document.getElementById('timer-btn-text').textContent = 'Start Padhai';
+            document.getElementById('timer-btn-icon').setAttribute('data-lucide', 'play');
+            lucide.createIcons();
+            updateTimerUI();
+        }
+
+        function updateSessionBadge() {
+            document.getElementById('session-badge').textContent = `Sessions: ${state.sessionsCompleted}`;
+        }
+
+        // --- 6. TASKS, NOTES & RESOURCE LINKS ---
+        document.getElementById('task-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const text = document.getElementById('task-input').value.trim();
+            const subject = document.getElementById('task-subject').value;
+            if (!text) return;
+            state.tasks.unshift({ id: Date.now(), subject, text, completed: false });
+            localStorage.setItem('ssh_tasks', JSON.stringify(state.tasks));
+            document.getElementById('task-input').value = '';
+            renderTasks();
+            showToast('Naya target add ho gaya!');
+        });
+
+        function toggleTask(id) {
+            state.tasks = state.tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
+            localStorage.setItem('ssh_tasks', JSON.stringify(state.tasks));
+            renderTasks();
+        }
+
+        function deleteTask(id) {
+            state.tasks = state.tasks.filter(t => t.id !== id);
+            localStorage.setItem('ssh_tasks', JSON.stringify(state.tasks));
+            renderTasks();
+        }
+
+        function renderTasks() {
+            const list = document.getElementById('task-list');
+            const done = state.tasks.filter(t => t.completed).length;
+            const total = state.tasks.length;
+            const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+
+            document.getElementById('task-counter').textContent = `${done}/${total} Done`;
+            document.getElementById('progress-percent').textContent = `${pct}%`;
+            document.getElementById('progress-bar').style.width = `${pct}%`;
+            updateHomeStats();
+
+            if (total === 0) {
+                list.innerHTML = `<p class="text-center py-8 text-xs text-slate-400">Abhi koi target nahi hai. Upar se apna pehla study target add karein!</p>`;
+                return;
+            }
+
+            list.innerHTML = state.tasks.map(t => `
+                <div class="flex items-center justify-between gap-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/70 dark:border-slate-700/70">
+                    <button onclick="toggleTask(${t.id})" class="flex items-center gap-3 text-left flex-1">
+                        <div class="w-5 h-5 rounded-lg flex items-center justify-center border shrink-0 ${t.completed ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 dark:border-slate-600'}">
+                            ${t.completed ? '<i data-lucide="check" class="w-3.5 h-3.5"></i>' : ''}
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold ${t.completed ? 'line-through text-slate-400' : 'text-slate-800 dark:text-slate-100'}">${escapeHTML(t.text)}</p>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300">${t.subject}</span>
+                        </div>
+                    </button>
+                    <button onclick="deleteTask(${t.id})" class="p-1.5 text-slate-400 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        const notesArea = document.getElementById('quick-notes');
+        function loadNotesForSubject() {
+            const sub = document.getElementById('notes-subject-select').value;
+            notesArea.value = state.notes[sub] || '';
+        }
+        notesArea.addEventListener('input', () => {
+            const sub = document.getElementById('notes-subject-select').value;
+            state.notes[sub] = notesArea.value;
+            localStorage.setItem('ssh_notes', JSON.stringify(state.notes));
+        });
+        function copyNotes() {
+            notesArea.select();
+            document.execCommand('copy');
+            showToast('Notes copy ho gaye!');
+        }
+
+        document.getElementById('resource-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const title = document.getElementById('res-title').value.trim();
+            const url = document.getElementById('res-url').value.trim();
+            if (!title || !url) return;
+            state.resources.unshift({ id: Date.now(), title, url });
+            localStorage.setItem('ssh_resources', JSON.stringify(state.resources));
+            e.target.reset();
+            renderResources();
+            showToast('Link save ho gaya!');
+        });
+
+        function deleteResource(id) {
+            state.resources = state.resources.filter(r => r.id !== id);
+            localStorage.setItem('ssh_resources', JSON.stringify(state.resources));
+            renderResources();
+        }
+
+        function renderResources() {
+            const list = document.getElementById('resource-list');
+            list.innerHTML = state.resources.map(r => `
+                <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/70 dark:border-slate-700/70">
+                    <a href="${escapeHTML(r.url)}" target="_blank" rel="noopener noreferrer" class="text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-2 truncate">
+                        <i data-lucide="external-link" class="w-4 h-4 shrink-0"></i>
+                        <span class="truncate">${escapeHTML(r.title)}</span>
+                    </a>
+                    <button onclick="deleteResource(${r.id})" class="p-1 text-slate-400 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function escapeHTML(str) {
+            return String(str).replace(/[&<>'"]/g, t => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[t]));
+        }
+
+        // --- 7. BILINGUAL INFINITY QUIZ ENGINE (DEVANAGARI HINDI + ENGLISH) ---
+        let currentQuizQuestion = null;
+        let currentQuestionAnswered = false;
+        let recentHashes = [];
+
+        // Hindi Subject: Always Pure Devanagari Hindi
+        const HINDI_ONLY_BANK = [
+            { diff: 'Easy', q: '‘सूर्य’ का सही पर्यायवाची शब्द कौन-सा है?', a: 'दिनकर', opts: ['शशि', 'दिनकर', 'नीरज', 'पवन'], exp: 'दिनकर, भानु, भास्कर और रवि ‘सूर्य’ के प्रमुख पर्यायवाची शब्द हैं।' },
+            { diff: 'Easy', q: '‘अमृत’ शब्द का विलोम (विपरीतार्थक) शब्द क्या होगा?', a: 'विष', opts: ['सुधा', 'विष', 'जल', 'मधु'], exp: '‘अमृत’ का विलोम शब्द ‘विष’ होता है।' },
+            { diff: 'Easy', q: 'हिंदी वर्णमाला में कुल कितने स्वर होते हैं?', a: '11', opts: ['9', '11', '13', '33'], exp: 'हिंदी वर्णमाला में मूल रूप से 11 स्वर (अ से औ तक) होते हैं।' },
+            { diff: 'Medium', q: '‘नीलकमल’ शब्द में कौन-सा समास है?', a: 'कर्मधारय समास', opts: ['द्वंद्व समास', 'कर्मधारय समास', 'द्विगु समास', 'अव्ययीभाव समास'], exp: 'जहाँ विशेषण और विशेष्य का संबंध हो (नीला है जो कमल), वहाँ कर्मधारय समास होता है।' },
+            { diff: 'Medium', q: '‘विद्यालय’ का सही संधि-विच्छेद क्या है?', a: 'विद्या + आलय', opts: ['विद्या + लय', 'विद्या + आलय', 'विद्य + आलय', 'विद्या + अलय'], exp: 'विद्या + आलय = विद्यालय (दीर्घ स्वर संधि)।' },
+            { diff: 'Medium', q: '‘जो सब कुछ जानता हो’ वाक्यांश के लिए एक शब्द क्या होगा?', a: 'सर्वज्ञ', opts: ['अल्पज्ञ', 'सर्वज्ञ', 'अज्ञानी', 'कृपालु'], exp: 'जो सब कुछ जानता हो, उसे ‘सर्वज्ञ’ कहते हैं।' },
+            { diff: 'Hard', q: '‘वीर रस’ का स्थायी भाव क्या होता है?', a: 'उत्साह', opts: ['रति', 'शोक', 'उत्साह', 'क्रोध'], exp: 'वीर रस का स्थायी भाव ‘उत्साह’ होता है।' },
+            { diff: 'Hard', q: '‘कनक कनक ते सौ गुनी, मादकता अधिकाय’ में कौन-सा अलंकार है?', a: 'यमक अलंकार', opts: ['अनुप्रास अलंकार', 'यमक अलंकार', 'श्लेष अलंकार', 'उपमा अलंकार'], exp: 'यहाँ ‘कनक’ शब्द दो बार आया है और दोनों बार उसका अर्थ (सोना और धतूरा) अलग है, इसलिए यमक अलंकार है।' }
+        ];
+
+        // English Subject: Always Pure English
+        const ENGLISH_ONLY_BANK = [
+            { diff: 'Easy', q: 'Choose the correct synonym of the word "ABUNDANT":', a: 'Plentiful', opts: ['Scarce', 'Plentiful', 'Empty', 'Rare'], exp: '"Abundant" means existing in large quantities; "Plentiful" is its closest synonym.' },
+            { diff: 'Easy', q: 'Fill in the blank: She _____ to school every morning.', a: 'goes', opts: ['go', 'goes', 'going', 'gone'], exp: 'In Simple Present Tense, a singular subject (She) takes "-es" with the verb (goes).' },
+            { diff: 'Medium', q: 'Identify the Passive Voice of: "Ram writes a letter."', a: 'A letter is written by Ram.', opts: ['A letter was written by Ram.', 'A letter is written by Ram.', 'A letter is writing by Ram.', 'Ram is written a letter.'], exp: 'Simple Present Active converts to "is/am/are + past participle (written)" in Passive Voice.' },
+            { diff: 'Medium', q: 'What is the antonym (opposite) of "OPTIMISTIC"?', a: 'Pessimistic', opts: ['Hopeful', 'Pessimistic', 'Cheerful', 'Bright'], exp: '"Optimistic" means hopeful about the future, whereas "Pessimistic" means expecting the worst.' },
+            { diff: 'Hard', q: 'What is the meaning of the idiom "A piece of cake"?', a: 'Something very easy to do', opts: ['A sweet dessert', 'Something very easy to do', 'A difficult challenge', 'A small portion'], exp: 'The idiom "a piece of cake" refers to a task that can be accomplished very easily.' }
+        ];
+
+        // Bilingual Curated Bank (Hindi Medium vs English Medium)
+        const BILINGUAL_BANK = {
+            Science: [
+                {
+                    diff: 'Easy',
+                    hi: { q: 'शुद्ध जल (Pure Water) का pH मान कितना होता है?', a: '7', opts: ['5', '7', '9', '14'], exp: 'शुद्ध जल उदासीन (Neutral) होता है, इसलिए इसका pH मान 7 होता है।' },
+                    en: { q: 'What is the pH value of pure water?', a: '7', opts: ['5', '7', '9', '14'], exp: 'Pure water is neutral, so its pH value is exactly 7.' }
+                },
+                {
+                    diff: 'Easy',
+                    hi: { q: 'विद्युत धारा (Electric Current) का SI मात्रक क्या है?', a: 'एम्पियर (Ampere)', opts: ['वोल्ट (Volt)', 'एम्पियर (Ampere)', 'ओम (Ohm)', 'वाट (Watt)'], exp: 'विद्युत धारा को एम्पियर (A) में मापा जाता है।' },
+                    en: { q: 'What is the SI unit of Electric Current?', a: 'Ampere (A)', opts: ['Volt (V)', 'Ampere (A)', 'Ohm (Ω)', 'Watt (W)'], exp: 'Electric current is measured in Amperes (A).' }
+                },
+                {
+                    diff: 'Medium',
+                    hi: { q: 'प्रकाश संश्लेषण (Photosynthesis) के दौरान पौधे कौन-सी गैस बाहर निकालते हैं?', a: 'ऑक्सीजन (O₂)', opts: ['कार्बन डाइऑक्साइड', 'नाइट्रोजन', 'ऑक्सीजन (O₂)', 'हाइड्रोजन'], exp: 'पौधे सूर्य के प्रकाश में CO₂ और जल का उपयोग करके ग्लूकोज बनाते हैं तथा ऑक्सीजन (O₂) मुक्त करते हैं।' },
+                    en: { q: 'Which gas is released by plants during Photosynthesis?', a: 'Oxygen (O₂)', opts: ['Carbon Dioxide', 'Nitrogen', 'Oxygen (O₂)', 'Hydrogen'], exp: 'Plants absorb CO₂ and water to make glucose and release Oxygen (O₂).' }
+                },
+                {
+                    diff: 'Medium',
+                    hi: { q: 'ओम के नियम (Ohm’s Law) के अनुसार सही सूत्र क्या है?', a: 'V = I × R', opts: ['V = I / R', 'V = I × R', 'R = V × I', 'I = V × R'], exp: 'ओम के नियम के अनुसार विभवांतर (V) = धारा (I) × प्रतिरोध (R) होता है।' },
+                    en: { q: 'According to Ohm’s Law, what is the correct formula?', a: 'V = I × R', opts: ['V = I / R', 'V = I × R', 'R = V × I', 'I = V × R'], exp: 'Ohm’s law states that Voltage (V) = Current (I) × Resistance (R).' }
+                },
+                {
+                    diff: 'Hard',
+                    hi: { q: 'विरंजक चूर्ण (Bleaching Powder) का रासायनिक सूत्र क्या है?', a: 'CaOCl₂', opts: ['NaHCO₃', 'Na₂CO₃', 'CaOCl₂', 'CaSO₄'], exp: 'कैल्शियम ऑक्सीक्लोराइड (CaOCl₂) को विरंजक चूर्ण कहा जाता है।' },
+                    en: { q: 'What is the chemical formula of Bleaching Powder?', a: 'CaOCl₂', opts: ['NaHCO₃', 'Na₂CO₃', 'CaOCl₂', 'CaSO₄'], exp: 'Calcium Oxychloride (CaOCl₂) is chemically known as Bleaching Powder.' }
+                },
+                {
+                    diff: 'Hard',
+                    hi: { q: 'कोशिका के किस अंग को "कोशिका का ऊर्जा घर" (Powerhouse of Cell) कहा जाता है?', a: 'माइटोकॉन्ड्रिया', opts: ['राइबोसोम', 'माइटोकॉन्ड्रिया', 'गॉल्जीकाय', 'लाइसोसोम'], exp: 'माइटोकॉन्ड्रिया ATP के रूप में ऊर्जा उत्पन्न करता है।' },
+                    en: { q: 'Which organelle is known as the "Powerhouse of the Cell"?', a: 'Mitochondria', opts: ['Ribosome', 'Mitochondria', 'Golgi Body', 'Lysosome'], exp: 'Mitochondria generates chemical energy in the form of ATP.' }
+                }
+            ],
+            'Social Science': [
+                {
+                    diff: 'Easy',
+                    hi: { q: 'भारत का संविधान कब लागू हुआ था?', a: '26 जनवरी 1950', opts: ['15 अगस्त 1947', '26 नवंबर 1949', '26 जनवरी 1950', '2 अक्टूबर 1950'], exp: '26 जनवरी 1950 को भारत का संविधान पूर्ण रूप से लागू हुआ और भारत एक गणतंत्र बना।' },
+                    en: { q: 'When did the Constitution of India come into effect?', a: '26 January 1950', opts: ['15 August 1947', '26 November 1949', '26 January 1950', '2 October 1950'], exp: 'The Constitution of India came into force on 26 January 1950.' }
+                },
+                {
+                    diff: 'Medium',
+                    hi: { q: 'काली मिट्टी (Black Soil) किस फसल की खेती के लिए सबसे उपयुक्त मानी जाती है?', a: 'कपास (Cotton)', opts: ['चावल', 'कपास (Cotton)', 'चाय', 'गेहूँ'], exp: 'काली मिट्टी (रेगुर मिट्टी) में नमी धारण करने की अधिक क्षमता होती है, जो कपास के लिए सर्वोत्तम है।' },
+                    en: { q: 'Black Soil (Regur soil) is best suited for growing which crop?', a: 'Cotton', opts: ['Rice', 'Cotton', 'Tea', 'Wheat'], exp: 'Black soil retains moisture well and is ideal for Cotton cultivation.' }
+                },
+                {
+                    diff: 'Hard',
+                    hi: { q: 'जलियांवाला बाग हत्याकांड किस वर्ष हुआ था?', a: '13 अप्रैल 1919', opts: ['13 अप्रैल 1919', '5 फरवरी 1922', '15 अगस्त 1942', '23 मार्च 1931'], exp: '13 अप्रैल 1919 को अमृतसर के जलियांवाला बाग में यह दुखद घटना घटित हुई थी।' },
+                    en: { q: 'In which year did the Jallianwala Bagh massacre take place?', a: '13 April 1919', opts: ['13 April 1919', '5 February 1922', '15 August 1942', '23 March 1931'], exp: 'The Jallianwala Bagh tragedy occurred on 13 April 1919 in Amritsar.' }
+                }
+            ],
+            GK: [
+                {
+                    diff: 'Easy',
+                    hi: { q: 'ISRO (भारतीय अंतरिक्ष अनुसंधान संगठन) का मुख्यालय कहाँ स्थित है?', a: 'बेंगलुरु', opts: ['मुंबई', 'हैदराबाद', 'बेंगलुरु', 'नई दिल्ली'], exp: 'ISRO का मुख्यालय कर्नाटक की राजधानी बेंगलुरु में स्थित है।' },
+                    en: { q: 'Where is the headquarters of ISRO located?', a: 'Bengaluru', opts: ['Mumbai', 'Hyderabad', 'Bengaluru', 'New Delhi'], exp: 'ISRO headquarters is located in Bengaluru, Karnataka.' }
+                },
+                {
+                    diff: 'Medium',
+                    hi: { q: 'भारतीय रिज़र्व बैंक (RBI) की स्थापना किस वर्ष हुई थी?', a: '1935', opts: ['1935', '1947', '1950', '1969'], exp: 'RBI की स्थापना 1 अप्रैल 1935 को हुई थी और इसका मुख्यालय मुंबई में है।' },
+                    en: { q: 'In which year was the Reserve Bank of India (RBI) established?', a: '1935', opts: ['1935', '1947', '1950', '1969'], exp: 'RBI was established on 1 April 1935.' }
+                },
+                {
+                    diff: 'Hard',
+                    hi: { q: 'भारत के पहले कृत्रिम उपग्रह (Satellite) का नाम क्या था?', a: 'आर्यभट्ट', opts: ['भास्कर', 'रोहिणी', 'आर्यभट्ट', 'चंद्रयान-1'], exp: '19 अप्रैल 1975 को भारत ने अपना पहला उपग्रह ‘आर्यभट्ट’ लॉन्च किया था।' },
+                    en: { q: 'What was the name of India’s first artificial satellite?', a: 'Aryabhata', opts: ['Bhaskara', 'Rohini', 'Aryabhata', 'Chandrayaan-1'], exp: 'India launched its first satellite Aryabhata on 19 April 1975.' }
+                }
+            ],
+            'IT/ITeS': [
+                {
+                    diff: 'Easy',
+                    hi: { q: 'कंप्यूटर का मस्तिष्क (Brain of Computer) किसे कहा जाता है?', a: 'CPU (सेंट्रल प्रोसेसिंग यूनिट)', opts: ['RAM', 'हार्ड डिस्क', 'CPU (सेंट्रल प्रोसेसिंग यूनिट)', 'मॉनिटर'], exp: 'CPU सभी गणनाएँ और प्रोसेसिंग करता है, इसलिए इसे कंप्यूटर का मस्तिष्क कहते हैं।' },
+                    en: { q: 'Which component is known as the "Brain of the Computer"?', a: 'CPU (Central Processing Unit)', opts: ['RAM', 'Hard Disk', 'CPU (Central Processing Unit)', 'Monitor'], exp: 'The CPU executes instructions and performs all calculations.' }
+                },
+                {
+                    diff: 'Medium',
+                    hi: { q: 'डेटाबेस में "SQL" का पूरा नाम क्या है?', a: 'Structured Query Language', opts: ['Simple Query Language', 'Structured Query Language', 'System Quality Logic', 'Standard Question List'], exp: 'SQL का उपयोग डेटाबेस से डेटा प्राप्त करने और प्रबंधित करने के लिए किया जाता है।' },
+                    en: { q: 'What does "SQL" stand for in Database Management?', a: 'Structured Query Language', opts: ['Simple Query Language', 'Structured Query Language', 'System Quality Logic', 'Standard Question List'], exp: 'SQL stands for Structured Query Language.' }
+                },
+                {
+                    diff: 'Hard',
+                    hi: { q: 'नेटवर्किंग के OSI मॉडल में कुल कितनी लेयर्स (Layers) होती हैं?', a: '7 लेयर्स', opts: ['4 लेयर्स', '5 लेयर्स', '7 लेयर्स', '8 लेयर्स'], exp: 'OSI संदर्भ मॉडल में फिजिकल लेयर से एप्लीकेशन लेयर तक कुल 7 लेयर्स होती हैं।' },
+                    en: { q: 'How many layers are there in the OSI Networking Model?', a: '7 Layers', opts: ['4 Layers', '5 Layers', '7 Layers', '8 Layers'], exp: 'The OSI model consists of 7 distinct networking layers.' }
+                }
+            ]
+        };
+
+        // Bilingual States & Capitals for Infinite GK
+        const STATES_CAPITALS_BILINGUAL = [
+            { hi: ['मध्य प्रदेश', 'भोपाल'], en: ['Madhya Pradesh', 'Bhopal'] },
+            { hi: ['उत्तर प्रदेश', 'लखनऊ'], en: ['Uttar Pradesh', 'Lucknow'] },
+            { hi: ['राजस्थान', 'जयपुर'], en: ['Rajasthan', 'Jaipur'] },
+            { hi: ['महाराष्ट्र', 'मुंबई'], en: ['Maharashtra', 'Mumbai'] },
+            { hi: ['बिहार', 'पटना'], en: ['Bihar', 'Patna'] },
+            { hi: ['गुजरात', 'गांधीनगर'], en: ['Gujarat', 'Gandhinagar'] },
+            { hi: ['कर्नाटक', 'बेंगलुरु'], en: ['Karnataka', 'Bengaluru'] },
+            { hi: ['तमिलनाडु', 'चेन्नई'], en: ['Tamil Nadu', 'Chennai'] },
+            { hi: ['पश्चिम बंगाल', 'कोलकाता'], en: ['West Bengal', 'Kolkata'] },
+            { hi: ['हिमाचल प्रदेश', 'शिमला'], en: ['Himachal Pradesh', 'Shimla'] },
+            { hi: ['उत्तराखंड', 'देहरादून'], en: ['Uttarakhand', 'Dehradun'] },
+            { hi: ['ओडिशा', 'भुवनेश्वर'], en: ['Odisha', 'Bhubaneswar'] },
+            { hi: ['केरल', 'तिरुवनंतपुरम'], en: ['Kerala', 'Thiruvananthapuram'] },
+            { hi: ['छत्तीसगढ़', 'रायपुर'], en: ['Chhattisgarh', 'Raipur'] }
+        ];
+
+        function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+        function shuffle(arr) {
+            const c = [...arr];
+            for (let i = c.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [c[i], c[j]] = [c[j], c[i]];
+            }
+            return c;
+        }
+
+        // Procedural Infinite Math Generator in Both Hindi & English
+        function generateProceduralMath(diff, med) {
+            const isHi = med === 'hindi';
+            const mode = randInt(1, 3);
+
+            if (diff === 'Easy') {
+                if (mode === 1) {
+                    const a = randInt(15, 95), b = randInt(12, 85), ans = a + b;
+                    return {
+                        subject: 'Maths', diff,
+                        q: isHi ? `हल करें: ${a} + ${b} का मान क्या होगा?` : `Calculate: What is ${a} + ${b}?`,
+                        a: String(ans),
+                        opts: shuffle([String(ans), String(ans + 10), String(ans - 5), String(ans + 2)]),
+                        exp: isHi ? `${a} और ${b} को जोड़ने पर ${ans} प्राप्त होता है।` : `Adding ${a} and ${b} equals ${ans}.`
+                    };
+                } else {
+                    const n = randInt(5, 20), ans = n * n;
+                    return {
+                        subject: 'Maths', diff,
+                        q: isHi ? `संख्या ${n} का वर्ग (${n}²) क्या होगा?` : `What is the square of ${n} (${n}²)?`,
+                        a: String(ans),
+                        opts: shuffle([String(ans), String(n * 2), String(ans + n), String(ans - 4)]),
+                        exp: isHi ? `${n}² = ${n} × ${n} = ${ans} होता है।` : `${n}² = ${n} × ${n} = ${ans}.`
+                    };
+                }
+            } else if (diff === 'Medium') {
+                if (mode <= 2) {
+                    const x = randInt(2, 14), a = randInt(2, 8), b = randInt(3, 20), c = a * x + b;
+                    return {
+                        subject: 'Maths', diff,
+                        q: isHi ? `यदि ${a}x + ${b} = ${c} है, तो x का मान क्या होगा?` : `Solve for x: If ${a}x + ${b} = ${c}, find x.`,
+                        a: String(x),
+                        opts: shuffle([String(x), String(x + 2), String(x - 1), String(x + 4)]),
+                        exp: isHi ? `${a}x = ${c} - ${b} = ${c - b} ⇒ x = ${c - b} / ${a} = ${x}` : `${a}x = ${c} - ${b} = ${c - b} ⇒ x = ${x}.`
+                    };
+                } else {
+                    const pct = [10, 20, 25, 30, 50][randInt(0, 4)];
+                    const base = randInt(2, 20) * 20;
+                    const ans = (pct * base) / 100;
+                    return {
+                        subject: 'Maths', diff,
+                        q: isHi ? `${base} का ${pct}% कितना होगा?` : `What is ${pct}% of ${base}?`,
+                        a: String(ans),
+                        opts: shuffle([String(ans), String(ans + 10), String(ans * 2), String(Math.max(1, ans - 5))]),
+                        exp: isHi ? `(${pct} / 100) × ${base} = ${ans}` : `(${pct} / 100) × ${base} = ${ans}.`
+                    };
+                }
+            } else {
+                const a = randInt(2, 10), d = randInt(3, 8), n = randInt(8, 18);
+                const ans = a + (n - 1) * d;
+                return {
+                    subject: 'Maths', diff,
+                    q: isHi
+                        ? `समांतर श्रेणी (AP): ${a}, ${a + d}, ${a + 2 * d}... का ${n}वाँ पद (aₙ) क्या होगा?`
+                        : `Arithmetic Progression (AP): Find the ${n}th term of ${a}, ${a + d}, ${a + 2 * d}...`,
+                    a: String(ans),
+                    opts: shuffle([String(ans), String(ans + d), String(ans - d), String(a + n * d)]),
+                    exp: isHi
+                        ? `सूत्र: aₙ = a + (n - 1)d = ${a} + (${n} - 1)×${d} = ${ans}`
+                        : `Formula: aₙ = a + (n - 1)d = ${a} + (${n} - 1)×${d} = ${ans}.`
+                };
+            }
+        }
+
+        function generateProceduralGK(diff, med) {
+            const isHi = med === 'hindi';
+            const idx = randInt(0, STATES_CAPITALS_BILINGUAL.length - 1);
+            const item = STATES_CAPITALS_BILINGUAL[idx];
+            const stateName = isHi ? item.hi[0] : item.en[0];
+            const capName = isHi ? item.hi[1] : item.en[1];
+
+            const distractors = [];
+            while (distractors.length < 3) {
+                const rItem = STATES_CAPITALS_BILINGUAL[randInt(0, STATES_CAPITALS_BILINGUAL.length - 1)];
+                const rCap = isHi ? rItem.hi[1] : rItem.en[1];
+                if (rCap !== capName && !distractors.includes(rCap)) distractors.push(rCap);
+            }
+
+            return {
+                subject: 'GK', diff,
+                q: isHi ? `भारत के राज्य "${stateName}" की राजधानी क्या है?` : `What is the capital of the Indian state "${stateName}"?`,
+                a: capName,
+                opts: shuffle([capName, ...distractors]),
+                exp: isHi ? `${stateName} की राजधानी ${capName} है।` : `${capName} is the capital of ${stateName}.`
+            };
+        }
+
+        function buildQuestion(selectedSub, diff) {
+            const med = getActiveMedium();
+            const subs = ['Maths', 'Science', 'Social Science', 'GK', 'Hindi', 'English', 'IT/ITeS'];
+            const sub = selectedSub === 'All' ? subs[randInt(0, subs.length - 1)] : selectedSub;
+
+            // Rule 1: Hindi subject is ALWAYS pure Hindi
+            if (sub === 'Hindi') {
+                let pool = HINDI_ONLY_BANK.filter(q => q.diff === diff);
+                if (!pool.length) pool = HINDI_ONLY_BANK;
+                const chosen = pool[randInt(0, pool.length - 1)];
+                return { subject: 'Hindi', diff: chosen.diff, q: chosen.q, a: chosen.a, opts: shuffle(chosen.opts), exp: chosen.exp };
+            }
+
+            // Rule 2: English subject is ALWAYS pure English
+            if (sub === 'English') {
+                let pool = ENGLISH_ONLY_BANK.filter(q => q.diff === diff);
+                if (!pool.length) pool = ENGLISH_ONLY_BANK;
+                const chosen = pool[randInt(0, pool.length - 1)];
+                return { subject: 'English', diff: chosen.diff, q: chosen.q, a: chosen.a, opts: shuffle(chosen.opts), exp: chosen.exp };
+            }
+
+            // Rule 3: Maths uses procedural generator in chosen medium
+            if (sub === 'Maths') {
+                return generateProceduralMath(diff, med);
+            }
+
+            // Rule 4: GK mixes dynamic state-capitals + curated GK in chosen medium
+            if (sub === 'GK' && Math.random() < 0.5) {
+                return generateProceduralGK(diff, med);
+            }
+
+            // Rule 5: Other subjects pull from bilingual bank according to active medium
+            const bank = BILINGUAL_BANK[sub] || BILINGUAL_BANK['Science'];
+            let pool = bank.filter(q => q.diff === diff);
+            if (!pool.length) pool = bank;
+            const chosen = pool[randInt(0, pool.length - 1)];
+            const langObj = med === 'hindi' ? chosen.hi : chosen.en;
+
+            return {
+                subject: sub,
+                diff: chosen.diff,
+                q: langObj.q,
+                a: langObj.a,
+                opts: shuffle(langObj.opts),
+                exp: langObj.exp
+            };
+        }
+
+        function generateNextQuestion() {
+            const selectedSub = document.getElementById('quiz-subject-select').value;
+            const diff = document.getElementById('quiz-difficulty-select').value;
+
+            let qObj = null;
+            for (let i = 0; i < 8; i++) {
+                qObj = buildQuestion(selectedSub, diff);
+                if (!recentHashes.includes(qObj.q)) break;
+            }
+            recentHashes.push(qObj.q);
+            if (recentHashes.length > 6) recentHashes.shift();
+
+            currentQuizQuestion = qObj;
+            currentQuestionAnswered = false;
+
+            document.getElementById('q-badge-subject').textContent = qObj.subject;
+            document.getElementById('q-badge-difficulty').textContent = qObj.diff;
+            document.getElementById('quiz-question-text').textContent = qObj.q;
+            document.getElementById('quiz-explanation-box').classList.add('hidden');
+
+            const labels = ['A', 'B', 'C', 'D'];
+            document.getElementById('quiz-options-grid').innerHTML = qObj.opts.map((opt, idx) => `
+                <button onclick="submitQuizAnswer(${idx})" id="quiz-opt-${idx}"
+                    class="group flex items-center gap-3 p-4 rounded-2xl bg-white dark:bg-slate-900 border-2 border-slate-200/80 dark:border-slate-700/80 hover:border-blue-500 text-left transition-all active:scale-[0.99]">
+                    <span class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 group-hover:bg-blue-600 group-hover:text-white font-display font-extrabold text-xs flex items-center justify-center shrink-0 transition-colors">
+                        ${labels[idx]}
+                    </span>
+                    <span class="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100">${escapeHTML(opt)}</span>
+                </button>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function submitQuizAnswer(idx) {
+            if (currentQuestionAnswered || !currentQuizQuestion) return;
+            currentQuestionAnswered = true;
+
+            const chosen = currentQuizQuestion.opts[idx];
+            const isCorrect = chosen === currentQuizQuestion.a;
+            const isHi = currentQuizQuestion.subject === 'Hindi' || (currentQuizQuestion.subject !== 'English' && getActiveMedium() === 'hindi');
+
+            state.quiz.solved++;
+            if (isCorrect) {
+                state.quiz.correct++;
+                state.quiz.streak++;
+                state.quiz.xp += currentQuizQuestion.diff === 'Hard' ? 20 : (currentQuizQuestion.diff === 'Medium' ? 15 : 10);
+                playQuizTone(true);
+            } else {
+                state.quiz.streak = 0;
+                playQuizTone(false);
+            }
+
+            localStorage.setItem('ssh_quiz', JSON.stringify(state.quiz));
+            updateQuizStatsUI();
+            updateHomeStats();
+
+            currentQuizQuestion.opts.forEach((opt, i) => {
+                const btn = document.getElementById(`quiz-opt-${i}`);
+                btn.disabled = true;
+                btn.classList.remove('hover:border-blue-500');
+                if (opt === currentQuizQuestion.a) {
+                    btn.className = 'flex items-center gap-3 p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border-2 border-emerald-500 text-left';
+                    btn.querySelector('span:first-child').className = 'w-8 h-8 rounded-xl bg-emerald-500 text-white font-display font-extrabold text-xs flex items-center justify-center shrink-0';
+                } else if (i === idx && !isCorrect) {
+                    btn.className = 'flex items-center gap-3 p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border-2 border-rose-500 text-left';
+                    btn.querySelector('span:first-child').className = 'w-8 h-8 rounded-xl bg-rose-500 text-white font-display font-extrabold text-xs flex items-center justify-center shrink-0';
+                } else {
+                    btn.classList.add('opacity-50');
+                }
+            });
+
+            const expBox = document.getElementById('quiz-explanation-box');
+            expBox.className = `mt-5 p-4 rounded-2xl border transition-all ${isCorrect
+                ? 'bg-emerald-50/90 border-emerald-200 text-emerald-900 dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-200'
+                : 'bg-rose-50/90 border-rose-200 text-rose-900 dark:bg-rose-950/40 dark:border-rose-800 dark:text-rose-200'}`;
+
+            document.getElementById('quiz-feedback-icon').innerHTML = isCorrect
+                ? '<i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600"></i>'
+                : '<i data-lucide="x-circle" class="w-5 h-5 text-rose-600"></i>';
+
+            document.getElementById('quiz-feedback-title').textContent = isCorrect
+                ? (isHi ? 'शाबाश! बिल्कुल सही उत्तर 🎉' : 'Awesome! Correct Answer 🎉')
+                : (isHi ? `गलत उत्तर! सही उत्तर: ${currentQuizQuestion.a}` : `Incorrect! Correct Answer: ${currentQuizQuestion.a}`);
+
+            document.getElementById('quiz-feedback-desc').textContent = currentQuizQuestion.exp;
+            lucide.createIcons();
+
+            if (isCorrect && state.quiz.autoNext) {
+                setTimeout(() => {
+                    if (currentQuestionAnswered) generateNextQuestion();
+                }, 2500);
+            }
+        }
+
+        function updateQuizStatsUI() {
+            document.getElementById('quiz-streak').textContent = state.quiz.streak;
+            document.getElementById('quiz-solved').textContent = state.quiz.solved;
+            document.getElementById('quiz-xp').textContent = state.quiz.xp;
+            const acc = state.quiz.solved === 0 ? 0 : Math.round((state.quiz.correct / state.quiz.solved) * 100);
+            document.getElementById('quiz-accuracy').textContent = `${acc}%`;
+        }
+
+        function resetQuizStats() {
+            state.quiz = { ...state.quiz, streak: 0, solved: 0, correct: 0, xp: 0 };
+            localStorage.setItem('ssh_quiz', JSON.stringify(state.quiz));
+            updateQuizStatsUI();
+            updateHomeStats();
+            showToast('Quiz stats reset ho gaye');
+        }
+
+        function toggleQuizSound() {
+            state.quiz.sound = !state.quiz.sound;
+            localStorage.setItem('ssh_quiz', JSON.stringify(state.quiz));
+            updateSettingsUI();
+            showToast(state.quiz.sound ? 'Quiz Sound ON' : 'Quiz Sound OFF');
+        }
+
+        function toggleAutoNext() {
+            state.quiz.autoNext = !state.quiz.autoNext;
+            localStorage.setItem('ssh_quiz', JSON.stringify(state.quiz));
+            updateSettingsUI();
+            showToast(state.quiz.autoNext ? 'Auto-Next Question ON' : 'Auto-Next Question OFF');
+        }
+
+        function updateSettingsUI() {
+            const sBtn = document.getElementById('settings-sound-btn');
+            sBtn.textContent = state.quiz.sound ? 'ON' : 'OFF';
+            sBtn.className = state.quiz.sound
+                ? 'px-3.5 py-2 rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 text-xs font-extrabold'
+                : 'px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-extrabold';
+
+            const aBtn = document.getElementById('settings-autonext-btn');
+            aBtn.textContent = state.quiz.autoNext ? 'ON' : 'OFF';
+            aBtn.className = state.quiz.autoNext
+                ? 'px-3.5 py-2 rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 text-xs font-extrabold'
+                : 'px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-extrabold';
+        }
+
+        function playQuizTone(ok) {
+            if (!state.quiz.sound) return;
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = ok ? 'triangle' : 'sawtooth';
+                osc.frequency.setValueAtTime(ok ? 660 : 220, ctx.currentTime);
+                if (ok) osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.18);
+                gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.25);
+            } catch (e) {}
+        }
+
+        // Keyboard shortcuts for quiz
+        document.addEventListener('keydown', (e) => {
+            const tag = document.activeElement.tagName.toLowerCase();
+            if (tag === 'input' || tag === 'textarea' || tag === 'select' || state.activeTab !== 'quiz') return;
+            if (['1', '2', '3', '4'].includes(e.key)) submitQuizAnswer(parseInt(e.key) - 1);
+            else if (e.key === 'Enter' && currentQuestionAnswered) {
+                e.preventDefault();
+                generateNextQuestion();
+            }
+        });
+    </script>
+</body>
+</html>
